@@ -360,4 +360,7 @@ AC_CONFIG_COMMANDS_PRE([
   esac
 ])
 
+# Whether the compiler is GCC
+AM_CONDITIONAL([COMPILER_IS_GCC], [test "$GCC" = yes])
+
 AC_OUTPUT

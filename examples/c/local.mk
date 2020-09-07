@@ -23,3 +23,4 @@ include %D%/mfcalc/local.mk
 include %D%/pushcalc/local.mk
 include %D%/reccalc/local.mk
 include %D%/rpcalc/local.mk
+include %D%/buildscenario/local.mk
