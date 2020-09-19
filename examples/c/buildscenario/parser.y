@@ -17,32 +17,32 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-%{
+%code requires {
 
-/*
- * These headers must be in that order because "parser.h" needs YYSTYPE in
- * order to define the parser structure.  But parser.h also defines the types
- * that are required for Bison's yyparse declaration in y.tab.h to work.
- * The solution is the hack in the Makefile to remove the yyparse declaration.
- */
-#include "y.tab.h"
-#include "parser.h"
+  typedef struct yyguts_t scanner_t;
+  typedef struct parser parser_t;
+  typedef void *yyscan_t;
 
-/*
- * Byacc doesn't need the following at all. We need to add it for Bison
- * because we stripped the yyparse declaration from y.tab.h in the Makefile.
- */
-#if YYBISON
-int yyparse(scanner_t *, parser_t *);
-#endif
-
-void parser_func(scanner_t *s, parser_t *p)
-{
-  (void) s;
-  (void) p;
 }
 
-%}
+%code provides {
+  struct token {
+    YYSTYPE yy_lval;
+  };
+
+  struct parser {
+    scanner_t *scanner;
+    struct token tok;
+    void *ast;
+  };
+
+  int yylex(YYSTYPE *yylval_param, yyscan_t yyscanner);
+
+  void yyerror(scanner_t *scanner, parser_t *, const char *s);
+  void parser_func(scanner_t *s, parser_t *p);
+  parser_t *parser_create(void);
+  int parse(parser_t *);
+}
 
 %pure-parser
 %parse-param{scanner_t *scnr}
@@ -62,6 +62,12 @@ top  : SPACE  { $$ = $1; parser->ast = 0; }
      ;
 
 %%
+
+void parser_func(scanner_t *s, parser_t *p)
+{
+  (void) s;
+  (void) p;
+}
 
 int yylex(YYSTYPE *yyparam, yyscan_t scanner)
 {

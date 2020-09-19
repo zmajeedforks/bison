@@ -16,27 +16,5 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
-typedef struct yyguts_t scanner_t;
-typedef struct parser parser_t;
-typedef void *yyscan_t;
 
-#ifdef SPACE /* If y.tab.h has been included ... */
-
-struct token {
-  YYSTYPE yy_lval;
-};
-
-struct parser {
-  scanner_t *scanner;
-  struct token tok;
-  void *ast;
-};
-
-int yylex(YYSTYPE *yylval_param, yyscan_t yyscanner);
-
-#endif
-
-void yyerror(scanner_t *scanner, parser_t *, const char *s);
-void parser_func(scanner_t *s, parser_t *p);
-parser_t *parser_create(void);
-int parse(parser_t *);
+#include "y.tab.h"

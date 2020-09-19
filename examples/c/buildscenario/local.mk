@@ -39,12 +39,7 @@ if COMPILER_IS_GCC
 endif
 
 %D%/y.tab.c: %D%/parser.y
-	$(BISON) --yacc -Wno-yacc -Wno-deprecated -v -d $<
-	@# workaround for Bison 3.x: yyparse declared in y.tab.h
-	sed -e /yyparse/d < y.tab.h > y.tab.h.tmp
-	mv y.tab.h.tmp %D%/y.tab.h
-	mv y.tab.c %D%/y.tab.c
-	mv y.output %D%/y.output
+	$(BISON) --yacc -Wno-yacc -Wno-deprecated -v -d -o$@ $<
 
 %D%/main.o: %D%/parser.h
 
