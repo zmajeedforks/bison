@@ -645,8 +645,11 @@ start: 'a' | 'a' ;
 AT_FULL_COMPILE([glr-regr6],,,, [-rall])
 
 AT_PARSER_CHECK([[glr-regr6]], 1,
-[Destructor called.
-],
+[AT_GLR2_CC_IF([[Destructor called.
+Destructor called.
+]],
+[[Destructor called.
+]])],
 [Ambiguity detected.
 Option 1,
   start -> <Rule 1, tokens 1 .. 1>
@@ -761,7 +764,13 @@ main (void)
 AT_FULL_COMPILE([glr-regr7],,,, [-rall])
 
 AT_PARSER_CHECK([[glr-regr7]], 2, [],
-[memory exhausted
+[memory exhausted[]AT_GLR2_CC_IF([[
+Destructor called on same value twice.
+Destructor called on same value twice.
+Destructor called on same value twice.
+Destructor called on same value twice.
+Destructor called on same value twice.
+Destructor called on same value twice.]])
 ])
 
 AT_BISON_OPTION_POPDEFS
@@ -953,8 +962,14 @@ main (void)
 AT_FULL_COMPILE([glr-regr9],,,, [-rall])
 
 # Exit 2: memory exhausted.
-AT_PARSER_CHECK([[glr-regr9]], 2, [],
+AT_GLR2_CC_IF(
+[AT_PARSER_CHECK([[glr-regr9]], 10, [],
 [memory exhausted
+Tokens = 6, Destructors = 11
+])],
+[AT_PARSER_CHECK([[glr-regr9]], 2, [],
+[memory exhausted
+])
 ])
 
 AT_BISON_OPTION_POPDEFS
@@ -1093,7 +1108,11 @@ main (void)
 
 AT_FULL_COMPILE([glr-regr11],,,, [-rall])
 
-AT_PARSER_CHECK([[glr-regr11]], 0, [], [])
+AT_GLR2_CC_IF(
+[AT_PARSER_CHECK([[glr-regr11]], 1, [],
+[Destructor calls: 2
+])],
+[AT_PARSER_CHECK([[glr-regr11]], 0, [], [])])
 
 AT_BISON_OPTION_POPDEFS
 AT_CLEANUP
@@ -2021,8 +2040,11 @@ d: %empty;
 
 AT_FULL_COMPILE([input])
 
-AT_PARSER_CHECK([[input --debug]], 1, [],
-[Starting parse
+AT_PARSER_CHECK([[input --debug]], 1, [], [stderr])
+
+# Discard Deleting lines coming from glr2.cc.
+AT_CHECK([sed -e '/^Deleting/d' stderr], [],
+[[Starting parse
 Entering state 0
 Reading a token
 Next token is token 'a' ()
@@ -2081,7 +2103,7 @@ Cleanup: popping nterm d ()
 Cleanup: popping token 'c' ()
 Cleanup: popping nterm b ()
 Cleanup: popping token 'a' ()
-])
+]])
 
 AT_BISON_OPTION_POPDEFS
 AT_CLEANUP

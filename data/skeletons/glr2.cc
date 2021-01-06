@@ -354,8 +354,8 @@ const std::ptrdiff_t strong_index_alias<T>::INVALID_INDEX =
     ///                  If null, print nothing.
     /// \param yykind    The symbol kind.
     void yy_destroy_ (const char* yymsg, symbol_kind_type yykind,
-                      const value_type* yyvaluep]b4_locations_if([[,
-                      const location_type* yylocationp]])[);
+                      value_type* yyvaluep]b4_locations_if([[,
+                      location_type* yylocationp]])[);
 
 ]b4_parse_param_vars[
   };
@@ -1554,8 +1554,11 @@ void glr_state::destroy (char const* yymsg, ]b4_namespace_ref[::]b4_parser_class
 {]b4_parse_assert_if([[
   check_ ();]])[
   if (yyresolved)
-    yyparser.yy_destroy_ (yymsg, yy_accessing_symbol(yylrState),
-                          &value ()]b4_locations_if([, &yyloc])[);
+    {
+      yyparser.yy_destroy_ (yymsg, yy_accessing_symbol(yylrState),
+                            &value ()]b4_locations_if([, &yyloc])[);
+      yylrState = 0;
+    }
   else
     {
       YY_SYMBOL_PRINT (yymsg << (firstVal() ? " unresolved" : " incomplete"),
@@ -2210,9 +2213,7 @@ public:
               YYLLOC_DEFAULT ((yys->yyloc), yyerror_range, 2);]])[
               yysymbol_kind_t yytoken = YYTRANSLATE (this->yychar);
               yyparser.yy_destroy_ ("Error: discarding",
-                                    yytoken, &yylval]b4_locations_if([, &yylloc])[);]b4_variant_if([[
-              // Value type destructor.
-              ]b4_symbol_variant([[YYTRANSLATE (this->yychar)]], [[yylval]], [[template destroy]])])[
+                                    yytoken, &yylval]b4_locations_if([, &yylloc])[);
               this->yychar = ]b4_namespace_ref[::]b4_parser_class[::token::]b4_symbol(empty, id)[;
             }
           yysymbol_kind_t yytoken = yygetToken (this->yychar, yyparser, *this]b4_user_args[);
@@ -2531,10 +2532,10 @@ public:
         yyglrShift (yyk,
                     yyLRgotoState (topState(yyk)->yylrState,
                                    yylhsNonterm (yyrule)),
-                    yyposn, val]b4_locations_if([, loc])[);]b4_variant_if([[
-        // FIXME: User destructors.
-        // Value type destructor.
-        ]b4_symbol_variant([[yylhsNonterm (yyrule)]], [[val]], [[template destroy]])])[
+                    yyposn, val]b4_locations_if([, loc])[);
+        yyparser.yy_destroy_ (YY_NULLPTR,
+                              yylhsNonterm (yyrule),
+                              &val]b4_locations_if([, &loc])[);
       }
     else
       {
@@ -2754,10 +2755,9 @@ private:
                                             &this->yylval]b4_locations_if([, yylocp])[);
                       break;
                     }
-                  yyuserMerge (yymerger[yyp->yyrule], val, yyval_other);]b4_variant_if([[
-                  // FIXME: User destructors.
-                  // Value type destructor.
-                  ]b4_symbol_variant([[yy_accessing_symbol (yys.yylrState)]], [[yyval_other]], [[template destroy]])])[
+                  yyuserMerge (yymerger[yyp->yyrule], val, yyval_other);
+                  yyparser.yy_destroy_ (YY_NULLPTR, yy_accessing_symbol (yys.yylrState),
+                                        &yyval_other]b4_locations_if([, &yydummy])[);
                 }
             }
       }
@@ -2777,10 +2777,8 @@ private:
       }
     else
       yys.setFirstVal(YY_NULLPTR);
-]b4_variant_if([[
-    // FIXME: User destructors.
-    // Value type destructor.
-    ]b4_symbol_variant([[yy_accessing_symbol (yys.yylrState)]], [[val]], [[template destroy]])])[
+    yyparser.yy_destroy_ (YY_NULLPTR, yy_accessing_symbol (yys.yylrState),
+                          &val]b4_locations_if([, yylocp])[);
     return yyflag;
   }
 
@@ -3131,10 +3129,9 @@ b4_dollar_popdef])[]dnl
                     yystack.yychar = token::]b4_symbol(empty, id)[;
                     yyposn += 1;
                     // FIXME: we should move yylval.
-                    yystack.yyglrShift (create_state_set_index(0), yyaction, yyposn, yystack.yylval]b4_locations_if([, yystack.yylloc])[);]b4_variant_if([[
-                    // FIXME: User destructors.
-                    // Value type destructor.
-                    ]b4_symbol_variant([[yytoken]], [[yystack.yylval]], [[template destroy]])])[
+                    yystack.yyglrShift (create_state_set_index(0), yyaction, yyposn, yystack.yylval]b4_locations_if([, yystack.yylloc])[);
+                    yy_destroy_ (YY_NULLPTR, yytoken,
+                                 &yystack.yylval]b4_locations_if([, &yystack.yylloc])[);
                     if (0 < yystack.yyerrState)
                       yystack.yyerrState -= 1;
                   }
@@ -3212,10 +3209,8 @@ b4_dollar_popdef])[]dnl
                 YYCDEBUG << "Stack " << yys.get() << " now in state "
                          << yystack.topState(yys)->yylrState << '\n';
               }
-]b4_variant_if([[
-              // FIXME: User destructors.
-              // Value type destructor.
-              ]b4_symbol_variant([[yytoken_to_shift]], [[yystack.yylval]], [[template destroy]])])[
+              yy_destroy_ (YY_NULLPTR, yytoken_to_shift,
+                           &yystack.yylval]b4_locations_if([, &yystack.yylloc])[);
 
             if (yystack.yystateStack.yytops.size() == 1)
               {
@@ -3343,8 +3338,8 @@ b4_dollar_popdef])[]dnl
 
   void
   ]b4_parser_class[::yy_destroy_ (const char* yymsg, symbol_kind_type yykind,
-                           const value_type* yyvaluep]b4_locations_if([[,
-                           const location_type* yylocationp]])[)
+                           value_type* yyvaluep]b4_locations_if([[,
+                           location_type* yylocationp]])[)
   {
     YY_USE (yyvaluep);]b4_locations_if([[
     YY_USE (yylocationp);]])[
@@ -3357,6 +3352,9 @@ b4_dollar_popdef])[]dnl
     YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
     ]b4_symbol_actions([destructor])[
     YY_IGNORE_MAYBE_UNINITIALIZED_END
+]b4_variant_if([[
+    // Value type destructor.
+    ]b4_symbol_variant([[yykind]], [[(*yyvaluep)]], [[template destroy]])])[
   }
 
 #if ]b4_api_PREFIX[DEBUG

@@ -820,6 +820,24 @@ AT_FULL_COMPILE([input])
 # an empty "line" nterm.
 # FIXME: This location is not satisfying.  Depend on the lookahead?
 AT_PARSER_CHECK([input '(x)'], 0, [],
+[AT_GLR2_CC_IF([[sending: '(' (0@0-9)
+sending: 'x' (1@10-19)
+Freeing token 'x' (1@10-19)
+thing (1@10-19): 'x' (1@10-19)
+Freeing nterm thing (1@10-19)
+sending: ')' (2@20-29)
+line (0@0-29): '(' (0@0-9) thing (1@10-19) ')' (2@20-29)
+Freeing nterm line (0@0-29)
+sending: END (3@30-39)
+input (0@29-29): /* Nothing */
+Freeing nterm input (0@29-29)
+input (2@0-29): line (0@0-29) input (0@29-29)
+Freeing nterm input (2@0-29)
+Freeing token END (3@30-39)
+Freeing token END (3@30-39)
+Freeing nterm input (2@0-29)
+Successful parse.
+]],
 [[sending: '(' (0@0-9)
 sending: 'x' (1@10-19)
 thing (1@10-19): 'x' (1@10-19)
@@ -831,7 +849,7 @@ input (2@0-29): line (0@0-29) input (0@29-29)
 Freeing token END (3@30-39)
 Freeing nterm input (2@0-29)
 Successful parse.
-]])
+]])])
 
 # Check the location of empty reductions raising an error
 # -------------------------------------------------------
@@ -841,21 +859,44 @@ Successful parse.
 #
 # So error recovery reports error@9-19.
 AT_PARSER_CHECK([input '!'], 0, [],
-[[sending: '!' (0@0-9)
+[AT_GLR2_CC_IF([[sending: '!' (0@0-9)
+sending: END (1@10-19)
+raise (4@9-9): %empty
+check-spontaneous-errors (5@9-19): error (@9-19)
+Freeing nterm check-spontaneous-errors (5@9-19)
+Freeing nterm input (5@0-19)
+Freeing token END (1@10-19)
+Freeing token END (1@10-19)
+Freeing nterm input (5@0-19)
+Successful parse.
+]], [[sending: '!' (0@0-9)
 sending: END (1@10-19)
 raise (4@9-9): %empty
 check-spontaneous-errors (5@9-19): error (@9-19)
 Freeing token END (1@10-19)
 Freeing nterm input (5@0-19)
 Successful parse.
-]])
+]])])
 
 # Check the location of not empty reductions raising an error
 # -----------------------------------------------------------
 # This time the error is raised from a rule with 2 rhs symbols: @10-29.
 # It is recovered @10-29.
 AT_PARSER_CHECK([[input '!!!']], 0, [],
+[AT_GLR2_CC_IF(
 [[sending: '!' (0@0-9)
+sending: '!' (1@10-19)
+sending: '!' (2@20-29)
+raise (5@10-29): ! (1@20-29) ! (2@20-29)
+check-spontaneous-errors (5@10-29): error (@10-29)
+Freeing nterm check-spontaneous-errors (5@10-29)
+Freeing nterm input (5@0-29)
+sending: END (3@30-39)
+Freeing token END (3@30-39)
+Freeing token END (3@30-39)
+Freeing nterm input (5@0-29)
+Successful parse.
+]], [[sending: '!' (0@0-9)
 sending: '!' (1@10-19)
 sending: '!' (2@20-29)
 raise (5@10-29): ! (1@20-29) ! (2@20-29)
@@ -864,13 +905,31 @@ sending: END (3@30-39)
 Freeing token END (3@30-39)
 Freeing nterm input (5@0-29)
 Successful parse.
-]])
+]])])
 
 # Check locations in error recovery
 # ---------------------------------
 # '(y)' is an error, but can be recovered from.  But what's the location
 # of the error itself ('y'), and of the resulting reduction ('(error)').
 AT_PARSER_CHECK([input '(y)'], 0, [],
+[AT_GLR2_CC_IF(
+[[sending: '(' (0@0-9)
+sending: 'y' (1@10-19)
+10.10-19.18: syntax error, unexpected 'y', expecting 'x'
+Freeing token 'y' (1@10-19)
+sending: ')' (2@20-29)
+line (-1@0-29): '(' (0@0-9) error (@10-19) ')' (2@20-29)
+Freeing nterm line (-1@0-29)
+sending: END (3@30-39)
+input (0@29-29): /* Nothing */
+Freeing nterm input (0@29-29)
+input (2@0-29): line (-1@0-29) input (0@29-29)
+Freeing nterm input (2@0-29)
+Freeing token END (3@30-39)
+Freeing token END (3@30-39)
+Freeing nterm input (2@0-29)
+Successful parse.
+]],
 [[sending: '(' (0@0-9)
 sending: 'y' (1@10-19)
 10.10-19.18: syntax error, unexpected 'y', expecting 'x'
@@ -883,7 +942,7 @@ input (2@0-29): line (-1@0-29) input (0@29-29)
 Freeing token END (3@30-39)
 Freeing nterm input (2@0-29)
 Successful parse.
-]])
+]])])
 
 
 # Syntax errors caught by the parser
@@ -901,6 +960,58 @@ Successful parse.
 #     '(', 'x', ')',
 #     'y'
 AT_PARSER_CHECK([input '(xxxxx)(x)(x)y'], 1, [],
+[AT_GLR2_CC_IF(
+[[sending: '(' (0@0-9)
+sending: 'x' (1@10-19)
+Freeing token 'x' (1@10-19)
+thing (1@10-19): 'x' (1@10-19)
+Freeing nterm thing (1@10-19)
+sending: 'x' (2@20-29)
+Freeing token 'x' (2@20-29)
+thing (2@20-29): 'x' (2@20-29)
+Freeing nterm thing (2@20-29)
+sending: 'x' (3@30-39)
+30.30-39.38: syntax error, unexpected 'x', expecting ')'
+Freeing nterm thing (2@20-29)
+Freeing nterm thing (1@10-19)
+Freeing token 'x' (3@30-39)
+sending: 'x' (4@40-49)
+Freeing token 'x' (4@40-49)
+sending: 'x' (5@50-59)
+Freeing token 'x' (5@50-59)
+sending: ')' (6@60-69)
+line (-1@0-69): '(' (0@0-9) error (@10-59) ')' (6@60-69)
+Freeing nterm line (-1@0-69)
+sending: '(' (7@70-79)
+sending: 'x' (8@80-89)
+Freeing token 'x' (8@80-89)
+thing (8@80-89): 'x' (8@80-89)
+Freeing nterm thing (8@80-89)
+sending: ')' (9@90-99)
+line (7@70-99): '(' (7@70-79) thing (8@80-89) ')' (9@90-99)
+Freeing nterm line (7@70-99)
+sending: '(' (10@100-109)
+sending: 'x' (11@110-119)
+Freeing token 'x' (11@110-119)
+thing (11@110-119): 'x' (11@110-119)
+Freeing nterm thing (11@110-119)
+sending: ')' (12@120-129)
+line (10@100-129): '(' (10@100-109) thing (11@110-119) ')' (12@120-129)
+Freeing nterm line (10@100-129)
+sending: 'y' (13@130-139)
+input (0@129-129): /* Nothing */
+Freeing nterm input (0@129-129)
+input (2@100-129): line (10@100-129) input (0@129-129)
+Freeing nterm input (2@100-129)
+input (2@70-129): line (7@70-99) input (2@100-129)
+Freeing nterm input (2@70-129)
+input (2@0-129): line (-1@0-69) input (2@70-129)
+Freeing nterm input (2@0-129)
+130.130-139.138: syntax error, unexpected 'y', expecting END
+Freeing nterm input (2@0-129)
+Freeing token 'y' (13@130-139)
+Parsing FAILED.
+]],
 [[sending: '(' (0@0-9)
 sending: 'x' (1@10-19)
 thing (1@10-19): 'x' (1@10-19)
@@ -936,7 +1047,7 @@ input (2@0-129): line (-1@0-69) input (2@70-129)
 Freeing nterm input (2@0-129)
 Freeing token 'y' (13@130-139)
 Parsing FAILED.
-]])
+]])])
 
 
 # Syntax error caught by the parser where lookahead = END
@@ -949,6 +1060,35 @@ Parsing FAILED.
 #     '(', 'x', ')',
 #     'x'
 AT_PARSER_CHECK([input '(x)(x)x'], 1, [],
+[AT_GLR2_CC_IF(
+[[sending: '(' (0@0-9)
+sending: 'x' (1@10-19)
+Freeing token 'x' (1@10-19)
+thing (1@10-19): 'x' (1@10-19)
+Freeing nterm thing (1@10-19)
+sending: ')' (2@20-29)
+line (0@0-29): '(' (0@0-9) thing (1@10-19) ')' (2@20-29)
+Freeing nterm line (0@0-29)
+sending: '(' (3@30-39)
+sending: 'x' (4@40-49)
+Freeing token 'x' (4@40-49)
+thing (4@40-49): 'x' (4@40-49)
+Freeing nterm thing (4@40-49)
+sending: ')' (5@50-59)
+line (3@30-59): '(' (3@30-39) thing (4@40-49) ')' (5@50-59)
+Freeing nterm line (3@30-59)
+sending: 'x' (6@60-69)
+Freeing token 'x' (6@60-69)
+thing (6@60-69): 'x' (6@60-69)
+Freeing nterm thing (6@60-69)
+sending: END (7@70-79)
+70.70-79.78: syntax error, unexpected END, expecting 'x'
+Freeing nterm thing (6@60-69)
+Freeing nterm line (3@30-59)
+Freeing nterm line (0@0-29)
+Freeing token END (7@70-79)
+Parsing FAILED.
+]],
 [[sending: '(' (0@0-9)
 sending: 'x' (1@10-19)
 thing (1@10-19): 'x' (1@10-19)
@@ -968,7 +1108,7 @@ Freeing nterm line (3@30-59)
 Freeing nterm line (0@0-29)
 Freeing token END (7@70-79)
 Parsing FAILED.
-]])
+]])])
 
 
 # Check destruction upon stack overflow
@@ -1837,7 +1977,7 @@ AT_FULL_COMPILE([[input]])
 AT_PARSER_CHECK([input --debug], 0, [], [stderr])
 # Don't be too picky on the traces, GLR is not exactly the same.  Keep
 # only the lines from the printer.
-AT_CHECK([[sed -ne '/ival:/p' stderr]], 0,
+AT_CHECK([[sed -ne '/^Deleting/d;/ival:/p' stderr]], 0,
 [[Next token is token UNTYPED (ival: 10, fval: 0.1)
 Shifting token UNTYPED (ival: 10, fval: 0.1)
 Next token is token INT (ival: 20, fval: 0.2)

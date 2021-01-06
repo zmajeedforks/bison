@@ -998,9 +998,12 @@ m4_define([_AT_CHECK_CALC_ERROR],
 # Normalize the observed and expected error messages, depending upon the
 # options.
 # 1. Remove the traces from observed.
+#    "Deleting" comes from glr2.cc, and hopefully, using moves instead of
+#    copies, we should be able to get rid of it.
 sed '
 / \$[[0-9$]]* = /d
 /^Cleanup:/d
+/^Deleting/d
 /^Discarding/d
 /^Entering/d
 /^Error:/d
