@@ -1052,6 +1052,7 @@ public:
           }
       }
     yystates.resize (newsize);
+    YYCDEBUG << "Removing dead stacks... done\n";
     yylookaheadNeeds.resize (newsize);
   }
 
@@ -2250,7 +2251,7 @@ public:
                 location_type yyerrloc;
                 yyerror_range[2].getState().yyloc = this->yylloc;
                 YYLLOC_DEFAULT (yyerrloc, (yyerror_range), 2);]])[
-                YY_SYMBOL_PRINT ("Shifting", yy_accessing_symbol(yytable[yyj]),
+                YY_SYMBOL_PRINT ("Shifting3", yy_accessing_symbol(yytable[yyj]),
                                  &yylval, &yyerrloc);
                 yyglrShift (create_state_set_index(0), yytable[yyj],
                             yys->yyposn, yylval]b4_locations_if([, yyerrloc])[);
@@ -2736,6 +2737,7 @@ private:
     value_type val;
     if (yymerge)
       {
+        abort();
         int yyprec = yydprec[yybest->yyrule];
         yyflag = yyresolveAction (*yybest, &val]b4_locations_if([, yylocp])[);
         if (yyflag == yyok)
@@ -2762,7 +2764,11 @@ private:
             }
       }
     else
-      yyflag = yyresolveAction (*yybest, &val]b4_locations_if([, yylocp])[);
+      {
+        YYCDEBUG << "---------- yyresolveAction 1\n";
+        yyflag = yyresolveAction (*yybest, &val]b4_locations_if([, yylocp])[);
+        YYCDEBUG << "---------- yyresolveAction 2\n";
+      }
 
     if (yyflag == yyok)
       {
@@ -2807,6 +2813,7 @@ private:
       /* Set default location.  */
       yyrhsVals[YYMAXRHS + YYMAXLEFT - 1].getState().yyloc = yyoptState->yyloc;]])[
     {
+      YYCDEBUG << "yyresolveAction...\n";
       int yychar_current = this->yychar;]b4_variant_if([[
       value_type yylval_current;
       ]b4_symbol_variant([YYTRANSLATE (this->yychar)],
@@ -2829,6 +2836,7 @@ private:
                          [this->yylval], [move], [yylval_current])], [[
       this->yylval = yylval_current;]])[]b4_locations_if([
       this->yylloc = yylloc_current;])[
+      YYCDEBUG << "yyresolveAction... done\n";
     }
     return yyflag;
   }]b4_locations_if([[
@@ -3125,11 +3133,12 @@ b4_dollar_popdef])[]dnl
                   break;
                 if (yyisShiftAction (yyaction))
                   {
-                    YY_SYMBOL_PRINT ("Shifting", yytoken, &yystack.yylval, &yystack.yylloc);
+                    YY_SYMBOL_PRINT ("Shifting1", yytoken, &yystack.yylval, &yystack.yylloc);
                     yystack.yychar = token::]b4_symbol(empty, id)[;
                     yyposn += 1;
                     // FIXME: we should move yylval.
                     yystack.yyglrShift (create_state_set_index(0), yyaction, yyposn, yystack.yylval]b4_locations_if([, yystack.yylloc])[);
+                    YY_SYMBOL_PRINT ("Shifted", yytoken, &yystack.yylval, &yystack.yylloc);
                     yy_destroy_ (YY_NULLPTR, yytoken,
                                  &yystack.yylval]b4_locations_if([, &yystack.yylloc])[);
                     if (0 < yystack.yyerrState)
@@ -3204,7 +3213,7 @@ b4_dollar_popdef])[]dnl
                   = yygetLRActions (yystate, yytoken_to_shift, yyconflicts);
                 /* Note that yyconflicts were handled by yyprocessOneStack.  */
                 YYCDEBUG << "On stack " << yys.get() << ", ";
-                YY_SYMBOL_PRINT ("shifting", yytoken_to_shift, &yystack.yylval, &yystack.yylloc);
+                YY_SYMBOL_PRINT ("shifting2", yytoken_to_shift, &yystack.yylval, &yystack.yylloc);
                 yystack.yyglrShift (yys, yyaction, yyposn, yystack.yylval]b4_locations_if([, yystack.yylloc])[);
                 YYCDEBUG << "Stack " << yys.get() << " now in state "
                          << yystack.topState(yys)->yylrState << '\n';

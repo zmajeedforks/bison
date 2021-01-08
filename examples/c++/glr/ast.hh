@@ -28,7 +28,12 @@ public:
   Node (const Node& node) = default;
   Node (Node&& node) = default;
   Node () = default;
-  ~Node () = default;
+  ~Node ()
+  {
+    std::cerr << "Dtor: ";
+    print(std::cerr);
+    std::cerr << '\n';
+  }
 
   template <typename T,
             // SFINAE block using this ctor as a copy/move ctor:
@@ -64,6 +69,8 @@ public:
 
 std::ostream& Node::print (std::ostream& o) const
 {
+  o << &impl_ << ": " << impl_ << ": ";
+  o << impl_.use_count() << ": ";
   if (impl_)
     impl_->print (o);
   return o;
@@ -92,7 +99,11 @@ template <typename T,
           std::enable_if_t<!std::is_same<Node, std::decay_t<T>>::value, int>*>
 Node::Node (T&& t)
   : impl_ (new NodeImpl<std::decay_t<T>>{std::forward<T> (t)})
-{}
+{
+  std::cerr << "Built: ";
+  print(std::cerr);
+  std::cerr << '\n';
+}
 
 class Nterm
 {
