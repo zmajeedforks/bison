@@ -309,7 +309,9 @@ m4_define([b4_symbol_type_define],
 
 #if 201103L <= YY_CPLUSPLUS
       /// Move constructor.
-      basic_symbol (basic_symbol&& that)
+      basic_symbol (basic_symbol&& that)]b4_variant_if([
+        YY_NOEXCEPT (]b4_type_foreach([b4_is_nothrow_move_constructible], [[
+                     && ]])[)])[
         : Base (std::move (that))
         , value (]b4_variant_if([], [std::move (that.value)]))b4_locations_if([
         , location (std::move (that.location))])[

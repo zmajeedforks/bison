@@ -83,7 +83,11 @@ m4_define([b4_variant_includes],
 # include <cassert>
 # define ]b4_assert[ assert
 #endif
-]])])
+]])
+#if 201103L <= YY_CPLUSPLUS
+# include <type_traits>
+#endif
+])
 
 
 
@@ -497,7 +501,8 @@ m4_define([b4_basic_symbol_constructor_define],
       basic_symbol (]b4_join(
           [typename Base::kind_type t],
           b4_symbol_if([$1], [has_type], [b4_symbol([$1], [type])&& v]),
-          b4_locations_if([location_type&& l]))[)
+          b4_locations_if([location_type&& l]))[)]b4_symbol_if([$1], [has_type], [
+        YY_NOEXCEPT (b4_is_nothrow_move_constructible([$1]))])[
         : Base (t)]b4_symbol_if([$1], [has_type], [
         , value (std::move (v))])[]b4_locations_if([
         , location (std::move (l))])[
@@ -513,6 +518,15 @@ m4_define([b4_basic_symbol_constructor_define],
       {}
 #endif
 ]])
+
+
+# b4_is_nothrow_move_constructible(SYMBOL-NUM)
+# --------------------------------------------
+# Participates in the predicate to enable basic_symbol's ctor to be noexpect.
+m4_define([b4_is_nothrow_move_constructible],
+[b4_symbol_if([$1], [has_type],
+              [[std::is_nothrow_move_constructible< ]b4_symbol([$1], [type])[ >::value]],
+              [true])])
 
 
 # b4_token_constructor_define
