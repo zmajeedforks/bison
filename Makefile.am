@@ -147,3 +147,12 @@ codespell:
 	     --regex "[\\w\\-'’\`]+\+*" \
 	     --ignore-words-list "ba,circularly,cloneable,copyable,define'd,dout,froms,iff,ifset,od,ois" \
 	     $$(git ls-files data doc lib src tests)
+
+spy:
+	$(CC) --version
+	$(CC) -dM -E - < /dev/null
+	echo "has attribute (__fallthrough__): __has_attribute (__fallthrough__)" > foo.c
+	$(MAKE) foo.i
+	cat foo.i
+	$(MAKE) lib/canonicalize.i
+	cat lib/canonicalize.i
