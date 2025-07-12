@@ -241,6 +241,109 @@ AT_BISON_OPTION_POPDEFS
 AT_CLEANUP
 
 ## --------------------------------------------------- ##
+## All possible settings for api.value.automove.       ##
+## --------------------------------------------------- ##
+
+AT_SETUP([Check omitted api.value.automove default value])
+
+AT_BISON_OPTION_PUSHDEFS([%skeleton "lalr1.cc"])
+
+AT_DATA_GRAMMAR([input.yy],
+[[%skeleton "lalr1.cc"
+%language "c++"
+%token <int> VAL
+%nterm <int> exp
+%%
+exp: VAL
+]])
+
+AT_BISON_CHECK([-o input.cc input.yy])
+AT_CHECK([grep 'yylhs\.value\.int.*YY_MOVE *' input.cc], 1, [ignore])
+
+AT_BISON_OPTION_POPDEFS
+AT_CLEANUP
+
+AT_SETUP([Check api.value.automove defined with no value])
+
+AT_BISON_OPTION_PUSHDEFS([%skeleton "lalr1.cc"])
+
+AT_DATA_GRAMMAR([input.yy],
+[[%skeleton "lalr1.cc"
+%language "c++"
+%define api.value.automove
+%token <int> VAL
+%nterm <int> exp
+%%
+exp: VAL
+]])
+
+AT_BISON_CHECK([-o input.cc input.yy])
+AT_CHECK([grep 'yylhs\.value\.int.*YY_MOVE *' input.cc], 0, [ignore])
+
+AT_BISON_OPTION_POPDEFS
+AT_CLEANUP
+
+AT_SETUP([Check api.value.automove true value])
+
+AT_BISON_OPTION_PUSHDEFS([%skeleton "lalr1.cc"])
+
+AT_DATA_GRAMMAR([input.yy],
+[[%skeleton "lalr1.cc"
+%language "c++"
+%define api.value.automove true
+%token <int> VAL
+%nterm <int> exp
+%%
+exp: VAL
+]])
+
+AT_BISON_CHECK([-o input.cc input.yy])
+AT_CHECK([grep 'yylhs\.value\.int.*YY_MOVE *' input.cc], 0, [ignore])
+
+AT_BISON_OPTION_POPDEFS
+AT_CLEANUP
+
+AT_SETUP([Check api.value.automove false value])
+
+AT_BISON_OPTION_PUSHDEFS([%skeleton "lalr1.cc"])
+
+AT_DATA_GRAMMAR([input.yy],
+[[%skeleton "lalr1.cc"
+%language "c++"
+%define api.value.automove false
+%token <int> VAL
+%nterm <int> exp
+%%
+exp: VAL
+]])
+
+AT_BISON_CHECK([-o input.cc input.yy])
+AT_CHECK([grep 'yylhs\.value\.int.*YY_MOVE *' input.cc], 1, [ignore])
+
+AT_BISON_OPTION_POPDEFS
+AT_CLEANUP
+
+AT_SETUP([Check api.value.automove empty string value])
+
+AT_BISON_OPTION_PUSHDEFS([%skeleton "lalr1.cc"])
+
+AT_DATA_GRAMMAR([input.yy],
+[[%skeleton "lalr1.cc"
+%language "c++"
+%define api.value.automove ""
+%token <int> VAL
+%nterm <int> exp
+%%
+exp: VAL
+]])
+
+AT_BISON_CHECK([-o input.cc input.yy])
+AT_CHECK([grep 'yylhs\.value\.int.*YY_MOVE *' input.cc], 0, [ignore])
+
+AT_BISON_OPTION_POPDEFS
+AT_CLEANUP
+
+## --------------------------------------------------- ##
 ## Multiple occurrences of $n and api.value.automove.  ##
 ## --------------------------------------------------- ##
 

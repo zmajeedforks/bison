@@ -111,10 +111,9 @@ m4_define([_b4_rhs_value],
 [b4_symbol_value([b4_rhs_data([$1], [$2]).value], [$3], [$4])])
 
 m4_define([b4_rhs_value],
-[b4_percent_define_ifdef([api.value.automove],
-                         [YY_MOVE (_b4_rhs_value($@))],
-                         [_b4_rhs_value($@)])])
-
+[b4_percent_define_flag_if([api.value.automove],
+                           [YY_MOVE (_b4_rhs_value($@))],
+                           [_b4_rhs_value($@)])])
 
 # b4_rhs_location(RULE-LENGTH, POS)
 # ---------------------------------
