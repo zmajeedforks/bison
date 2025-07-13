@@ -113,6 +113,8 @@ b4_percent_define_default([[define_location_comparison]],
                           [m4_if(b4_percent_define_get([[filename_type]]),
                                  [std::string], [[true]], [[false]])])
 
+# api.value.automove boolean default value false
+b4_percent_define_default([[api.value.automove]], [[false]])
 
 
 ## ----------- ##
